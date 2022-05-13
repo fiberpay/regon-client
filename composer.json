@@ -1,0 +1,22 @@
+{
+  "name": "fiberpay/regon-client-php",
+  "description": "PHP client for GUS legal entities registry",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Fiberpay\\RegonClient\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Jędrzej Jarocki",
+      "email": "jedrzej.jarocki@inpay.pl"
+    }
+  ],
+  "require": {
+    "php": "^7.4",
+    "ext-soap": "*",
+    "ext-simplexml": "*",
+    "ext-json": "*"
+  }
+}
