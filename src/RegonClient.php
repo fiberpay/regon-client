@@ -7,6 +7,7 @@ namespace Fiberpay\RegonClient;
 use Exception;
 use Fiberpay\RegonClient\Exceptions\InvalidEntityIdentifierException;
 use Fiberpay\RegonClient\Exceptions\RegonServiceCallFailedException;
+use InvalidArgumentException;
 use SoapFault;
 use SoapHeader;
 
@@ -20,6 +21,16 @@ class RegonClient
     private const LOGIN_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/Zaloguj';
     private const FIND_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DaneSzukajPodmioty';
     private const FULL_REPORT_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DanePobierzPelnyRaport';
+
+    public const REPORT_TYPE_LEGAL_PERSON = 'BIR11OsPrawna';
+    public const REPORT_TYPE_NATURAL_PERSON_GENERAL_DATA = 'BIR11OsFizycznaDaneOgolne';
+    public const REPORT_TYPE_NATURAL_PERSON_CEIDG = 'BIR11OsFizycznaDzialalnoscCeidg';
+
+    private const VALID_REPORTS = [
+        self::REPORT_TYPE_LEGAL_PERSON,
+        self::REPORT_TYPE_NATURAL_PERSON_GENERAL_DATA,
+        self::REPORT_TYPE_NATURAL_PERSON_CEIDG,
+    ];
 
     private const ENV_PRODUCTION = 'production';
     private const ENV_TEST = 'test';
@@ -36,7 +47,11 @@ class RegonClient
 
     private const TEST_CLIENT_KEY = 'abcde12345abcde12345';
 
-    public function __construct($isProduction, string $client_key = null)
+    /**
+     * @param bool $isProduction
+     * @param string|null $client_key
+     */
+    public function __construct(bool $isProduction = false, string $client_key = null)
     {
         $environment = $isProduction ? self::ENV_PRODUCTION : self::ENV_TEST;
 
@@ -64,29 +79,37 @@ class RegonClient
 
 
     /**
-     * @throws Exception
-     * @noinspection PhpUnused
+     * @param string $regon
+     * @return array
+     * @throws EntityNotFoundException
+     * @throws RegonServiceCallFailedException
      */
-    public function findByRegon($regon)
+    public function findByRegon(string $regon): array
     {
         $this->validateRegon($regon);
         return $this->findById('Regon', $regon);
     }
 
     /**
-     * @throws Exception
-     * @noinspection PhpUnused
+     * @param string $nip
+     * @return array
+     * @throws EntityNotFoundException
+     * @throws RegonServiceCallFailedException
      */
-    public function findByNip($nip)
+    public function findByNip(string $nip): array
     {
         $this->validateNip($nip);
         return $this->findById('Nip', $nip);
     }
 
     /**
-     * @throws Exception
+     * @param $id
+     * @param $value
+     * @return array
+     * @throws EntityNotFoundException
+     * @throws RegonServiceCallFailedException
      */
-    private function findById($id, $value)
+    private function findById($id, $value): array
     {
         $session = $this->signUp();
         try {
@@ -108,22 +131,30 @@ class RegonClient
     }
 
     /**
-     * @throws RegonServiceCallFailedException
-     * @throws Exception
+     * @param $regon
+     * @param $reportType
+     * @return array
+     * @throws RegonServiceCallFailedException|EntityNotFoundException
      */
-    public function getReport($regon): array
+    public function getReport($regon, $reportType): array
     {
         $this->validateRegon($regon);
+        $this->validateReportType($reportType);
+
         $session = $this->signUp();
         try {
             $client = $this->createSoapClient(self::FULL_REPORT_ACTION, $session);
-            $result = $client->DanePobierzPelnyRaport(['pRegon' => $regon, 'pNazwaRaportu' => 'BIR11OsFizycznaDaneOgolne']);
+            $result = $client->DanePobierzPelnyRaport(['pRegon' => $regon, 'pNazwaRaportu' => $reportType]);
             $data = simplexml_load_string($result->DanePobierzPelnyRaportResult)->dane;
 
             if (property_exists($data, 'ErrorCode')) {
-                throw new Exception($data->ErrorMessagePl);
+                if($data->ErrorCode == "4") {
+                    throw new EntityNotFoundException($data->ErrorMessagePL);
+                }
+                throw new RegonServiceCallFailedException($data->ErrorMessagePl);
             }
-            return (array)json_decode(json_encode($data));
+
+            return json_decode(json_encode($data), true);
 
         } catch (SoapFault $e) {
             $this->handleSoapFault($e);
@@ -153,6 +184,15 @@ class RegonClient
 
         if (!(preg_match($pattern, $regon))) {
             throw new InvalidEntityIdentifierException('REGON', $regon);
+        }
+    }
+
+    private function validateReportType($reportType)
+    {
+        $isValid = in_array($reportType, self::VALID_REPORTS);
+
+        if(!$isValid) {
+            throw new InvalidArgumentException("$reportType is not valid report type.");
         }
     }
 
@@ -219,7 +259,7 @@ class RegonClient
         }
 
         if($client_key === null) {
-            throw new \InvalidArgumentException("Client key is required for production use");
+            throw new InvalidArgumentException("Client key is required for production use");
         }
 
         return $client_key;
