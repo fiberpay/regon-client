@@ -1,5 +1,5 @@
 {
-  "name": "fiberpay/regon-client-php",
+  "name": "fiberpay/regon-client",
   "description": "PHP client for GUS legal entities registry",
   "license": "MIT",
   "autoload": {
