@@ -4,7 +4,6 @@
 namespace Fiberpay\RegonClient;
 
 
-use Exception;
 use Fiberpay\RegonClient\Exceptions\InvalidEntityIdentifierException;
 use Fiberpay\RegonClient\Exceptions\RegonServiceCallFailedException;
 use InvalidArgumentException;
@@ -118,12 +117,12 @@ class RegonClient
             $data = simplexml_load_string($result->DaneSzukajPodmiotyResult)->dane;
 
             if (property_exists($data, 'ErrorCode')) {
-                if($data->ErrorCode == "4") {
+                if ($data->ErrorCode == "4") {
                     throw new EntityNotFoundException($data->ErrorMessagePL);
                 }
                 throw new RegonServiceCallFailedException($data->ErrorMessagePl);
             }
-            return json_decode(json_encode($data));
+            return $this->toArray($data);
 
         } catch (SoapFault $e) {
             $this->handleSoapFault($e);
@@ -148,13 +147,13 @@ class RegonClient
             $data = simplexml_load_string($result->DanePobierzPelnyRaportResult)->dane;
 
             if (property_exists($data, 'ErrorCode')) {
-                if($data->ErrorCode == "4") {
+                if ($data->ErrorCode == "4") {
                     throw new EntityNotFoundException($data->ErrorMessagePL);
                 }
                 throw new RegonServiceCallFailedException($data->ErrorMessagePl);
             }
 
-            return json_decode(json_encode($data), true);
+            return $this->toArray($data);
 
         } catch (SoapFault $e) {
             $this->handleSoapFault($e);
@@ -191,7 +190,7 @@ class RegonClient
     {
         $isValid = in_array($reportType, self::VALID_REPORTS);
 
-        if(!$isValid) {
+        if (!$isValid) {
             throw new InvalidArgumentException("$reportType is not valid report type.");
         }
     }
@@ -258,10 +257,19 @@ class RegonClient
             return self::TEST_CLIENT_KEY;
         }
 
-        if($client_key === null) {
+        if ($client_key === null) {
             throw new InvalidArgumentException("Client key is required for production use");
         }
 
         return $client_key;
+    }
+
+    /**
+     * @param $data
+     * @return array
+     */
+    private function toArray($data): array
+    {
+        return get_object_vars($data);
     }
 }
