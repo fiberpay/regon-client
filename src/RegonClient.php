@@ -21,14 +21,26 @@ class RegonClient
     private const FIND_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DaneSzukajPodmioty';
     private const FULL_REPORT_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DanePobierzPelnyRaport';
 
+    public const REPORT_TYPE_ENTITY_TYPE = 'BIR11TypPodmiotu';
     public const REPORT_TYPE_LEGAL_PERSON = 'BIR11OsPrawna';
+    public const REPORT_TYPE_LEGAL_PERSON_PKD = 'BIR11OsPrawnaPkd';
     public const REPORT_TYPE_NATURAL_PERSON_GENERAL_DATA = 'BIR11OsFizycznaDaneOgolne';
     public const REPORT_TYPE_NATURAL_PERSON_CEIDG = 'BIR11OsFizycznaDzialalnoscCeidg';
+    public const REPORT_TYPE_NATURAL_PERSON_PKD = 'BIR11OsFizycznaPkd';
+    public const REPORT_TYPE_NATURAL_AGRICULTURAL_ACTIVITY = 'BIR11OsFizycznaDzialalnoscRolnicza';
+    public const REPORT_TYPE_NATURAL_OTHER_ACTIVITY = 'BIR11OsFizycznaDzialalnoscPozostala';
+    public const REPORT_TYPE_NATURAL_DELETED_ACTIVITY = 'BIR11OsFizycznaDzialalnoscSkreslona';
 
     private const VALID_REPORTS = [
+        self::REPORT_TYPE_ENTITY_TYPE,
         self::REPORT_TYPE_LEGAL_PERSON,
+        self::REPORT_TYPE_LEGAL_PERSON_PKD,
         self::REPORT_TYPE_NATURAL_PERSON_GENERAL_DATA,
         self::REPORT_TYPE_NATURAL_PERSON_CEIDG,
+        self::REPORT_TYPE_NATURAL_PERSON_PKD,
+        self::REPORT_TYPE_NATURAL_AGRICULTURAL_ACTIVITY,
+        self::REPORT_TYPE_NATURAL_OTHER_ACTIVITY,
+        self::REPORT_TYPE_NATURAL_DELETED_ACTIVITY,
     ];
 
     private const ENV_PRODUCTION = 'production';

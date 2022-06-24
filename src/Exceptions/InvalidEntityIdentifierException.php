@@ -2,7 +2,9 @@
 
 namespace Fiberpay\RegonClient\Exceptions;
 
-class InvalidEntityIdentifierException extends \InvalidArgumentException
+use InvalidArgumentException;
+
+class InvalidEntityIdentifierException extends InvalidArgumentException
 {
 
     /**
