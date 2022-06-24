@@ -27,9 +27,9 @@ class RegonClient
     public const REPORT_TYPE_NATURAL_PERSON_GENERAL_DATA = 'BIR11OsFizycznaDaneOgolne';
     public const REPORT_TYPE_NATURAL_PERSON_CEIDG = 'BIR11OsFizycznaDzialalnoscCeidg';
     public const REPORT_TYPE_NATURAL_PERSON_PKD = 'BIR11OsFizycznaPkd';
-    public const REPORT_TYPE_NATURAL_AGRICULTURAL_ACTIVITY = 'BIR11OsFizycznaDzialalnoscRolnicza';
-    public const REPORT_TYPE_NATURAL_OTHER_ACTIVITY = 'BIR11OsFizycznaDzialalnoscPozostala';
-    public const REPORT_TYPE_NATURAL_DELETED_ACTIVITY = 'BIR11OsFizycznaDzialalnoscSkreslona';
+    public const REPORT_TYPE_NATURAL_PERSON_AGRICULTURAL_ACTIVITY = 'BIR11OsFizycznaDzialalnoscRolnicza';
+    public const REPORT_TYPE_NATURAL_PERSON_OTHER_ACTIVITY = 'BIR11OsFizycznaDzialalnoscPozostala';
+    public const REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY = 'BIR11OsFizycznaDzialalnoscSkreslona';
 
     private const VALID_REPORTS = [
         self::REPORT_TYPE_ENTITY_TYPE,
@@ -38,9 +38,9 @@ class RegonClient
         self::REPORT_TYPE_NATURAL_PERSON_GENERAL_DATA,
         self::REPORT_TYPE_NATURAL_PERSON_CEIDG,
         self::REPORT_TYPE_NATURAL_PERSON_PKD,
-        self::REPORT_TYPE_NATURAL_AGRICULTURAL_ACTIVITY,
-        self::REPORT_TYPE_NATURAL_OTHER_ACTIVITY,
-        self::REPORT_TYPE_NATURAL_DELETED_ACTIVITY,
+        self::REPORT_TYPE_NATURAL_PERSON_AGRICULTURAL_ACTIVITY,
+        self::REPORT_TYPE_NATURAL_PERSON_OTHER_ACTIVITY,
+        self::REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY,
     ];
 
     private const ENV_PRODUCTION = 'production';
