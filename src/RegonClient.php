@@ -4,6 +4,7 @@
 namespace Fiberpay\RegonClient;
 
 
+use Fiberpay\RegonClient\Exceptions\EntityNotFoundException;
 use Fiberpay\RegonClient\Exceptions\InvalidEntityIdentifierException;
 use Fiberpay\RegonClient\Exceptions\RegonServiceCallFailedException;
 use InvalidArgumentException;

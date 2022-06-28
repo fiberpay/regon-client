@@ -1,6 +1,6 @@
 <?php
 
-namespace Fiberpay\RegonClient;
+namespace Fiberpay\RegonClient\Exceptions;
 
 use Exception;
 use SimpleXMLElement;
