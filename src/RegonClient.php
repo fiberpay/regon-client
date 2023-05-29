@@ -157,7 +157,11 @@ class RegonClient
         try {
             $client = $this->createSoapClient(self::FULL_REPORT_ACTION, $session);
             $result = $client->DanePobierzPelnyRaport(['pRegon' => $regon, 'pNazwaRaportu' => $reportType]);
-            $data = simplexml_load_string($result->DanePobierzPelnyRaportResult)->dane;
+            if ($reportType === self::REPORT_TYPE_NATURAL_PERSON_PKD || $reportType === self::REPORT_TYPE_LEGAL_PERSON_PKD) {
+                $data = simplexml_load_string($result->DanePobierzPelnyRaportResult);
+            } else {
+                $data = simplexml_load_string($result->DanePobierzPelnyRaportResult)->dane;
+            }
 
             if (property_exists($data, 'ErrorCode')) {
                 if ($data->ErrorCode == "4") {
