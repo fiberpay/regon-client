@@ -21,6 +21,7 @@ class RegonClient
     private const LOGIN_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/Zaloguj';
     private const FIND_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DaneSzukajPodmioty';
     private const FULL_REPORT_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DanePobierzPelnyRaport';
+    private const GET_CUMULATIVE_REPORT_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DanePobierzRaportZbiorczy';
 
     public const REPORT_TYPE_ENTITY_TYPE = 'BIR11TypPodmiotu';
     public const REPORT_TYPE_LEGAL_PERSON = 'BIR11OsPrawna';
@@ -42,6 +43,22 @@ class RegonClient
         self::REPORT_TYPE_NATURAL_PERSON_AGRICULTURAL_ACTIVITY,
         self::REPORT_TYPE_NATURAL_PERSON_OTHER_ACTIVITY,
         self::REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY,
+    ];
+
+    public const CUMULATIVE_REPORT_TYPE_NEW_PARTIES = 'BIR11NowePodmiotyPrawneOrazDzialalnosciOsFizycznych';
+    public const CUMULATIVE_REPORT_TYPE_UPDATED_PARTIES = 'BIR11AktualizowanePodmiotyPrawneOrazDzialalnosciOsFizycznych';
+    public const CUMULATIVE_REPORT_TYPE_REMOVED_PARTIES = 'BIR11SkreslonePodmiotyPrawneOrazDzialalnosciOsFizycznych';
+    public const CUMULATIVE_REPORT_TYPE_NEW_LOCAL_UNITS = 'BIR11NoweJednostkiLokalne';
+    public const CUMULATIVE_REPORT_TYPE_UPDATED_LOCAL_UNITS = 'BIR11AktualizowaneJednostkiLokalne';
+    public const CUMULATIVE_REPORT_TYPE_REMOVED_LOCAL_UNITS = 'BIR11JednostkiLokalneSkreslone';
+
+    private const VALID_CUMULATIVE_REPORTS = [
+        self::CUMULATIVE_REPORT_TYPE_NEW_PARTIES,
+        self::CUMULATIVE_REPORT_TYPE_UPDATED_PARTIES,
+        self::CUMULATIVE_REPORT_TYPE_REMOVED_PARTIES,
+        self::CUMULATIVE_REPORT_TYPE_NEW_LOCAL_UNITS,
+        self::CUMULATIVE_REPORT_TYPE_UPDATED_LOCAL_UNITS,
+        self::CUMULATIVE_REPORT_TYPE_REMOVED_LOCAL_UNITS,
     ];
 
     private const ENV_PRODUCTION = 'production';
@@ -142,6 +159,23 @@ class RegonClient
         }
     }
 
+    // data jako string w formacie YYYY-MM-DD
+    public function getCumulativeReport(string $date, string $collectiveReportType) {
+        $this->validateCumulativeReportType($collectiveReportType);
+        $session = $this->signUp();
+        try {
+            $client = $this->createSoapClient(self::GET_CUMULATIVE_REPORT_ACTION, $session);
+            $result = $client->DanePobierzRaportZbiorczy(['pDataRaportu' => $date, 'pNazwaRaportu' => $collectiveReportType]);
+
+            $xmlString = $result->DanePobierzRaportZbiorczyResult;
+            $dataXml = simplexml_load_string($xmlString);
+            $data = json_decode(json_encode($dataXml), true);
+            return $data;
+        } catch (SoapFault $e) {
+            $this->handleSoapFault($e);
+        }
+    }
+
     /**
      * @param $regon
      * @param $reportType
@@ -200,6 +234,14 @@ class RegonClient
         }
     }
 
+    private function validateCumulativeReportType($reportType)
+    {
+        $isValid = in_array($reportType, self::VALID_CUMULATIVE_REPORTS);
+
+        if (!$isValid) {
+            throw new InvalidArgumentException("$reportType is not valid report type.");
+        }
+    }
     private function validateReportType($reportType)
     {
         $isValid = in_array($reportType, self::VALID_REPORTS);
