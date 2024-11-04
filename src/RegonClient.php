@@ -169,13 +169,18 @@ class RegonClient
 
             $xmlString = $result->DanePobierzRaportZbiorczyResult;
             $dataXml = simplexml_load_string($xmlString);
+            if (property_exists($dataXml->dane, 'ErrorCode')) {
+                if ($dataXml->dane->ErrorCode == "4") {
+                    throw new EntityNotFoundException($dataXml->dane->ErrorMessagePl);
+                }
+                throw new RegonServiceCallFailedException($dataXml->dane->ErrorMessagePl);
+            }
             $data = json_decode(json_encode($dataXml), true);
-            return $data;
+            return $data["dane"];
         } catch (SoapFault $e) {
             $this->handleSoapFault($e);
         }
     }
-
     /**
      * @param $regon
      * @param $reportType
