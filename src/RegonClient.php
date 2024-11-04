@@ -157,15 +157,16 @@ class RegonClient
         try {
             $client = $this->createSoapClient(self::FULL_REPORT_ACTION, $session);
             $result = $client->DanePobierzPelnyRaport(['pRegon' => $regon, 'pNazwaRaportu' => $reportType]);
-            $data = simplexml_load_string($result->DanePobierzPelnyRaportResult)->dane;
+            $data = simplexml_load_string($result->DanePobierzPelnyRaportResult);
 
-            if (property_exists($data, 'ErrorCode')) {
-                if ($data->ErrorCode == "4") {
-                    throw new EntityNotFoundException($data->ErrorMessagePL);
-                }
-                throw new RegonServiceCallFailedException($data->ErrorMessagePl);
+            if (property_exists($data->dane, 'ErrorCode')) {
+                throw new RegonServiceCallFailedException($data->dane->ErrorMessagePl);
             }
 
+            //Kody PKD przychodzą raz jako obiekt, raz jako tablica obiektów, trzeba dostosować argument w toArray
+            if (!in_array($reportType, [self::REPORT_TYPE_NATURAL_PERSON_PKD, self::REPORT_TYPE_LEGAL_PERSON_PKD])) {
+                $data = $data->dane;
+            }
             return $this->toArray($data);
 
         } catch (SoapFault $e) {
