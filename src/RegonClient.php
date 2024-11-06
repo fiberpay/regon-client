@@ -21,6 +21,7 @@ class RegonClient
     private const LOGIN_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/Zaloguj';
     private const FIND_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DaneSzukajPodmioty';
     private const FULL_REPORT_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DanePobierzPelnyRaport';
+    private const GET_CUMULATIVE_REPORT_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DanePobierzRaportZbiorczy';
 
     public const REPORT_TYPE_ENTITY_TYPE = 'BIR11TypPodmiotu';
     public const REPORT_TYPE_LEGAL_PERSON = 'BIR11OsPrawna';
@@ -42,6 +43,22 @@ class RegonClient
         self::REPORT_TYPE_NATURAL_PERSON_AGRICULTURAL_ACTIVITY,
         self::REPORT_TYPE_NATURAL_PERSON_OTHER_ACTIVITY,
         self::REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY,
+    ];
+
+    public const CUMULATIVE_REPORT_TYPE_NEW_PARTIES = 'BIR11NowePodmiotyPrawneOrazDzialalnosciOsFizycznych';
+    public const CUMULATIVE_REPORT_TYPE_UPDATED_PARTIES = 'BIR11AktualizowanePodmiotyPrawneOrazDzialalnosciOsFizycznych';
+    public const CUMULATIVE_REPORT_TYPE_REMOVED_PARTIES = 'BIR11SkreslonePodmiotyPrawneOrazDzialalnosciOsFizycznych';
+    public const CUMULATIVE_REPORT_TYPE_NEW_LOCAL_UNITS = 'BIR11NoweJednostkiLokalne';
+    public const CUMULATIVE_REPORT_TYPE_UPDATED_LOCAL_UNITS = 'BIR11AktualizowaneJednostkiLokalne';
+    public const CUMULATIVE_REPORT_TYPE_REMOVED_LOCAL_UNITS = 'BIR11JednostkiLokalneSkreslone';
+
+    private const VALID_CUMULATIVE_REPORTS = [
+        self::CUMULATIVE_REPORT_TYPE_NEW_PARTIES,
+        self::CUMULATIVE_REPORT_TYPE_UPDATED_PARTIES,
+        self::CUMULATIVE_REPORT_TYPE_REMOVED_PARTIES,
+        self::CUMULATIVE_REPORT_TYPE_NEW_LOCAL_UNITS,
+        self::CUMULATIVE_REPORT_TYPE_UPDATED_LOCAL_UNITS,
+        self::CUMULATIVE_REPORT_TYPE_REMOVED_LOCAL_UNITS,
     ];
 
     private const ENV_PRODUCTION = 'production';
@@ -142,6 +159,28 @@ class RegonClient
         }
     }
 
+    // data jako string w formacie YYYY-MM-DD
+    public function getCumulativeReport(string $date, string $collectiveReportType) {
+        $this->validateCumulativeReportType($collectiveReportType);
+        $session = $this->signUp();
+        try {
+            $client = $this->createSoapClient(self::GET_CUMULATIVE_REPORT_ACTION, $session);
+            $result = $client->DanePobierzRaportZbiorczy(['pDataRaportu' => $date, 'pNazwaRaportu' => $collectiveReportType]);
+
+            $xmlString = $result->DanePobierzRaportZbiorczyResult;
+            $dataXml = simplexml_load_string($xmlString);
+            if (property_exists($dataXml->dane, 'ErrorCode')) {
+                if ($dataXml->dane->ErrorCode == "4") {
+                    throw new EntityNotFoundException($dataXml->dane->ErrorMessagePl);
+                }
+                throw new RegonServiceCallFailedException($dataXml->dane->ErrorMessagePl);
+            }
+            $data = json_decode(json_encode($dataXml), true);
+            return $data["dane"];
+        } catch (SoapFault $e) {
+            $this->handleSoapFault($e);
+        }
+    }
     /**
      * @param $regon
      * @param $reportType
@@ -157,15 +196,16 @@ class RegonClient
         try {
             $client = $this->createSoapClient(self::FULL_REPORT_ACTION, $session);
             $result = $client->DanePobierzPelnyRaport(['pRegon' => $regon, 'pNazwaRaportu' => $reportType]);
-            $data = simplexml_load_string($result->DanePobierzPelnyRaportResult)->dane;
+            $data = simplexml_load_string($result->DanePobierzPelnyRaportResult);
 
-            if (property_exists($data, 'ErrorCode')) {
-                if ($data->ErrorCode == "4") {
-                    throw new EntityNotFoundException($data->ErrorMessagePL);
-                }
-                throw new RegonServiceCallFailedException($data->ErrorMessagePl);
+            if (property_exists($data->dane, 'ErrorCode')) {
+                throw new RegonServiceCallFailedException($data->dane->ErrorMessagePl);
             }
 
+            //Kody PKD przychodzą raz jako obiekt, raz jako tablica obiektów, trzeba dostosować argument w toArray
+            if (!in_array($reportType, [self::REPORT_TYPE_NATURAL_PERSON_PKD, self::REPORT_TYPE_LEGAL_PERSON_PKD])) {
+                $data = $data->dane;
+            }
             return $this->toArray($data);
 
         } catch (SoapFault $e) {
@@ -199,6 +239,14 @@ class RegonClient
         }
     }
 
+    private function validateCumulativeReportType($reportType)
+    {
+        $isValid = in_array($reportType, self::VALID_CUMULATIVE_REPORTS);
+
+        if (!$isValid) {
+            throw new InvalidArgumentException("$reportType is not valid report type.");
+        }
+    }
     private function validateReportType($reportType)
     {
         $isValid = in_array($reportType, self::VALID_REPORTS);
