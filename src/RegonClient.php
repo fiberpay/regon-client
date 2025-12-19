@@ -113,10 +113,10 @@ class RegonClient
      * @throws EntityNotFoundException
      * @throws RegonServiceCallFailedException
      */
-    public function findByRegon(string $regon): array
+    public function findByRegon(string $regon, $lng = "pl"): array
     {
         $this->validateRegon($regon);
-        return $this->findById('Regon', $regon);
+        return $this->findById('Regon', $regon, $lng);
     }
 
     /**
@@ -125,10 +125,21 @@ class RegonClient
      * @throws EntityNotFoundException
      * @throws RegonServiceCallFailedException
      */
-    public function findByNip(string $nip): array
+    public function findByNip(string $nip, $lng = "pl"): array
     {
         $this->validateNip($nip);
-        return $this->findById('Nip', $nip);
+        return $this->findById('Nip', $nip, $lng);
+    }
+    /**
+     * @param string $krs
+     * @return array
+     * @throws EntityNotFoundException
+     * @throws RegonServiceCallFailedException
+     */
+    public function findByKrs(string $krs, $lng = "pl"): array
+    {
+        $this->validateKrs($krs);
+        return $this->findById('Krs', $krs, $lng);
     }
 
     /**
@@ -138,7 +149,7 @@ class RegonClient
      * @throws EntityNotFoundException
      * @throws RegonServiceCallFailedException
      */
-    private function findById($id, $value): array
+    private function findById($id, $value, $lng = "pl")
     {
         $session = $this->signUp();
         try {
@@ -147,10 +158,11 @@ class RegonClient
             $data = simplexml_load_string($result->DaneSzukajPodmiotyResult)->dane;
 
             if (property_exists($data, 'ErrorCode')) {
-                if ($data->ErrorCode == "4") {
-                    throw new EntityNotFoundException($data->ErrorMessagePL);
+                $error = $lng === "pl" ?  $data->ErrorMessagePl : $data->ErrorMessageEn;
+                if ($data->ErrorCode == '4') {
+                    throw new EntityNotFoundException($error);
                 }
-                throw new RegonServiceCallFailedException($data->ErrorMessagePl);
+                throw new RegonServiceCallFailedException($error);
             }
             return $this->toArray($data);
 
@@ -160,7 +172,7 @@ class RegonClient
     }
 
     // data jako string w formacie YYYY-MM-DD
-    public function getCumulativeReport(string $date, string $collectiveReportType) {
+    public function getCumulativeReport(string $date, string $collectiveReportType, $lng = "pl"){
         $this->validateCumulativeReportType($collectiveReportType);
         $session = $this->signUp();
         try {
@@ -170,10 +182,11 @@ class RegonClient
             $xmlString = $result->DanePobierzRaportZbiorczyResult;
             $dataXml = simplexml_load_string($xmlString);
             if (property_exists($dataXml->dane, 'ErrorCode')) {
+                $error = $lng === "pl" ?  $dataXml->dane->ErrorMessagePl : $dataXml->dane->ErrorMessageEn;
                 if ($dataXml->dane->ErrorCode == "4") {
-                    throw new EntityNotFoundException($dataXml->dane->ErrorMessagePl);
+                    throw new EntityNotFoundException($error);
                 }
-                throw new RegonServiceCallFailedException($dataXml->dane->ErrorMessagePl);
+                throw new RegonServiceCallFailedException($error);
             }
             $data = json_decode(json_encode($dataXml), true);
             return $data["dane"];
@@ -181,13 +194,14 @@ class RegonClient
             $this->handleSoapFault($e);
         }
     }
+
     /**
      * @param $regon
      * @param $reportType
      * @return array
      * @throws RegonServiceCallFailedException|EntityNotFoundException
      */
-    public function getReport($regon, $reportType): array
+    public function getReport($regon, $reportType, $lng = "pl")
     {
         $this->validateRegon($regon);
         $this->validateReportType($reportType);
@@ -199,7 +213,8 @@ class RegonClient
             $data = simplexml_load_string($result->DanePobierzPelnyRaportResult);
 
             if (property_exists($data->dane, 'ErrorCode')) {
-                throw new RegonServiceCallFailedException($data->dane->ErrorMessagePl);
+                $error = $lng === "pl" ?  $data->dane->ErrorMessagePl : $data->dane->ErrorMessageEn;
+                throw new RegonServiceCallFailedException($error);
             }
 
             //Kody PKD przychodzą raz jako obiekt, raz jako tablica obiektów, trzeba dostosować argument w toArray
@@ -223,6 +238,19 @@ class RegonClient
 
         if (!(preg_match($pattern, $nip))) {
             throw new InvalidEntityIdentifierException('NIP', $nip);
+        }
+    }
+
+    /**
+     * @param $krs
+     * @return void
+     */
+    private function validateKrs($krs)
+    {
+        $pattern = '/^\d{10}$/';
+
+        if (!(preg_match($pattern, $krs))) {
+            throw new InvalidEntityIdentifierException('KRS', $krs);
         }
     }
 
