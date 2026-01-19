@@ -286,7 +286,7 @@ class RegonClient
 
     /**
      * @param $e
-     * @return mixed
+     * @return never
      * @throws RegonServiceCallFailedException
      */
     private function handleSoapFault($e)
