@@ -23,7 +23,7 @@ class RegonClient
     private const FULL_REPORT_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DanePobierzPelnyRaport';
     private const GET_CUMULATIVE_REPORT_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DanePobierzRaportZbiorczy';
 
-    public const REPORT_TYPE_ENTITY_TYPE = 'BIR11TypPodmiotu';
+     public const REPORT_TYPE_ENTITY_TYPE = 'BIR11TypPodmiotu';
     public const REPORT_TYPE_LEGAL_PERSON = 'BIR11OsPrawna';
     public const REPORT_TYPE_LEGAL_PERSON_PKD = 'BIR11OsPrawnaPkd';
     public const REPORT_TYPE_NATURAL_PERSON_GENERAL_DATA = 'BIR11OsFizycznaDaneOgolne';
@@ -32,6 +32,8 @@ class RegonClient
     public const REPORT_TYPE_NATURAL_PERSON_AGRICULTURAL_ACTIVITY = 'BIR11OsFizycznaDzialalnoscRolnicza';
     public const REPORT_TYPE_NATURAL_PERSON_OTHER_ACTIVITY = 'BIR11OsFizycznaDzialalnoscPozostala';
     public const REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY = 'BIR11OsFizycznaDzialalnoscSkreslona';
+    public const REPORT_TYPE_LEGAL_PERSON_CIVIL_PARTNERSHIP_PARTNERS = 'BIR12OsPrawnaSpCywilnaWspolnicy';
+    public const REPORT_TYPE_LEGAL_PERSON_LOCAL_UNITS_LIST = 'BIR12OsPrawnaListaJednLokalnych';
 
     private const VALID_REPORTS = [
         self::REPORT_TYPE_ENTITY_TYPE,
@@ -43,7 +45,10 @@ class RegonClient
         self::REPORT_TYPE_NATURAL_PERSON_AGRICULTURAL_ACTIVITY,
         self::REPORT_TYPE_NATURAL_PERSON_OTHER_ACTIVITY,
         self::REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY,
+        self::REPORT_TYPE_LEGAL_PERSON_CIVIL_PARTNERSHIP_PARTNERS,
+        self::REPORT_TYPE_LEGAL_PERSON_LOCAL_UNITS_LIST
     ];
+
 
     public const CUMULATIVE_REPORT_TYPE_NEW_PARTIES = 'BIR11NowePodmiotyPrawneOrazDzialalnosciOsFizycznych';
     public const CUMULATIVE_REPORT_TYPE_UPDATED_PARTIES = 'BIR11AktualizowanePodmiotyPrawneOrazDzialalnosciOsFizycznych';
