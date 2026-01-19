@@ -249,10 +249,10 @@ class RegonClient
     }
 
     /**
-     * @param $nip
+     * @param string $nip
      * @return void
      */
-    private function validateNip($nip)
+    private function validateNip(string $nip): void
     {
         $pattern = '/^\d{10}$/';
 
@@ -262,10 +262,10 @@ class RegonClient
     }
 
     /**
-     * @param $krs
+     * @param string $krs
      * @return void
      */
-    private function validateKrs($krs)
+    private function validateKrs(string $krs): void
     {
         $pattern = '/^\d{10}$/';
 
@@ -275,10 +275,10 @@ class RegonClient
     }
 
     /**
-     * @param $regon
+     * @param string $regon
      * @return void
      */
-    private function validateRegon($regon)
+    private function validateRegon(string $regon): void
     {
         $pattern = '/^(\d{9}|\d{14})$/';
 
@@ -287,7 +287,11 @@ class RegonClient
         }
     }
 
-    private function validateCumulativeReportType($reportType)
+    /**
+     * @param string $reportType
+     * @return void
+     */
+    private function validateCumulativeReportType(string $reportType): void
     {
         $isValid = in_array($reportType, self::VALID_CUMULATIVE_REPORTS);
 
@@ -295,7 +299,11 @@ class RegonClient
             throw new InvalidArgumentException("$reportType is not valid report type.");
         }
     }
-    private function validateReportType($reportType)
+    /**
+     * @param string $reportType
+     * @return void
+     */
+    private function validateReportType(string $reportType): void
     {
         $isValid = in_array($reportType, self::VALID_REPORTS);
 
