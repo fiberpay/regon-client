@@ -136,6 +136,7 @@ class RegonClient
         $this->validateNip($nip);
         return $this->findById('Nip', $nip, $language);
     }
+
     /**
      * @param string $krs
      * @param string $language Language code ('pl' or 'en')
