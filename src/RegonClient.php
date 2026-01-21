@@ -113,47 +113,52 @@ class RegonClient
 
     /**
      * @param string $regon
+     * @param string $language Language code ('pl' or 'en')
      * @return array
      * @throws EntityNotFoundException
      * @throws RegonServiceCallFailedException
      */
-    public function findByRegon(string $regon, $lng = "pl"): array
+    public function findByRegon(string $regon, string $language = "pl"): array
     {
         $this->validateRegon($regon);
-        return $this->findById('Regon', $regon, $lng);
+        return $this->findById('Regon', $regon, $language);
     }
 
     /**
      * @param string $nip
+     * @param string $language Language code ('pl' or 'en')
      * @return array
      * @throws EntityNotFoundException
      * @throws RegonServiceCallFailedException
      */
-    public function findByNip(string $nip, $lng = "pl"): array
+    public function findByNip(string $nip, string $language = "pl"): array
     {
         $this->validateNip($nip);
-        return $this->findById('Nip', $nip, $lng);
-    }
-    /**
-     * @param string $krs
-     * @return array
-     * @throws EntityNotFoundException
-     * @throws RegonServiceCallFailedException
-     */
-    public function findByKrs(string $krs, $lng = "pl"): array
-    {
-        $this->validateKrs($krs);
-        return $this->findById('Krs', $krs, $lng);
+        return $this->findById('Nip', $nip, $language);
     }
 
     /**
-     * @param $id
-     * @param $value
+     * @param string $krs
+     * @param string $language Language code ('pl' or 'en')
      * @return array
      * @throws EntityNotFoundException
      * @throws RegonServiceCallFailedException
      */
-    private function findById($id, $value, $lng = "pl")
+    public function findByKrs(string $krs, string $language = "pl"): array
+    {
+        $this->validateKrs($krs);
+        return $this->findById('Krs', $krs, $language);
+    }
+
+    /**
+     * @param string $id
+     * @param string $value
+     * @param string $language Language code ('pl' or 'en')
+     * @return array
+     * @throws EntityNotFoundException
+     * @throws RegonServiceCallFailedException
+     */
+    private function findById(string $id, string $value, string $language = "pl"): array
     {
         $session = $this->signUp();
         try {
@@ -162,7 +167,7 @@ class RegonClient
             $data = simplexml_load_string($result->DaneSzukajPodmiotyResult)->dane;
 
             if (property_exists($data, 'ErrorCode')) {
-                $error = $lng === "pl" ?  $data->ErrorMessagePl : $data->ErrorMessageEn;
+                $error = $language === "pl" ?  $data->ErrorMessagePl : $data->ErrorMessageEn;
                 if ($data->ErrorCode == '4') {
                     throw new EntityNotFoundException($error);
                 }
@@ -175,8 +180,16 @@ class RegonClient
         }
     }
 
-    // data jako string w formacie YYYY-MM-DD
-    public function getCumulativeReport(string $date, string $collectiveReportType, $lng = "pl"){
+    /**
+     * @param string $date Date in YYYY-MM-DD format
+     * @param string $collectiveReportType
+     * @param string $language Language code ('pl' or 'en')
+     * @return array
+     * @throws EntityNotFoundException
+     * @throws RegonServiceCallFailedException
+     */
+    public function getCumulativeReport(string $date, string $collectiveReportType, string $language = "pl"): array
+    {
         $this->validateCumulativeReportType($collectiveReportType);
         $session = $this->signUp();
         try {
@@ -186,7 +199,7 @@ class RegonClient
             $xmlString = $result->DanePobierzRaportZbiorczyResult;
             $dataXml = simplexml_load_string($xmlString);
             if (property_exists($dataXml->dane, 'ErrorCode')) {
-                $error = $lng === "pl" ?  $dataXml->dane->ErrorMessagePl : $dataXml->dane->ErrorMessageEn;
+                $error = $language === "pl" ?  $dataXml->dane->ErrorMessagePl : $dataXml->dane->ErrorMessageEn;
                 if ($dataXml->dane->ErrorCode == "4") {
                     throw new EntityNotFoundException($error);
                 }
@@ -200,12 +213,13 @@ class RegonClient
     }
 
     /**
-     * @param $regon
-     * @param $reportType
+     * @param string $regon
+     * @param string $reportType
+     * @param string $language Language code ('pl' or 'en')
      * @return array
      * @throws RegonServiceCallFailedException|EntityNotFoundException
      */
-    public function getReport($regon, $reportType, $lng = "pl")
+    public function getReport(string $regon, string $reportType, string $language = "pl"): array
     {
         $this->validateRegon($regon);
         $this->validateReportType($reportType);
@@ -217,7 +231,7 @@ class RegonClient
             $data = simplexml_load_string($result->DanePobierzPelnyRaportResult);
 
             if (property_exists($data->dane, 'ErrorCode')) {
-                $error = $lng === "pl" ?  $data->dane->ErrorMessagePl : $data->dane->ErrorMessageEn;
+                $error = $language === "pl" ?  $data->dane->ErrorMessagePl : $data->dane->ErrorMessageEn;
                 throw new RegonServiceCallFailedException($error);
             }
 
@@ -236,10 +250,10 @@ class RegonClient
     }
 
     /**
-     * @param $nip
+     * @param string $nip
      * @return void
      */
-    private function validateNip($nip)
+    private function validateNip(string $nip): void
     {
         $pattern = '/^\d{10}$/';
 
@@ -249,10 +263,10 @@ class RegonClient
     }
 
     /**
-     * @param $krs
+     * @param string $krs
      * @return void
      */
-    private function validateKrs($krs)
+    private function validateKrs(string $krs): void
     {
         $pattern = '/^\d{10}$/';
 
@@ -262,10 +276,10 @@ class RegonClient
     }
 
     /**
-     * @param $regon
+     * @param string $regon
      * @return void
      */
-    private function validateRegon($regon)
+    private function validateRegon(string $regon): void
     {
         $pattern = '/^(\d{9}|\d{14})$/';
 
@@ -274,7 +288,11 @@ class RegonClient
         }
     }
 
-    private function validateCumulativeReportType($reportType)
+    /**
+     * @param string $reportType
+     * @return void
+     */
+    private function validateCumulativeReportType(string $reportType): void
     {
         $isValid = in_array($reportType, self::VALID_CUMULATIVE_REPORTS);
 
@@ -282,7 +300,11 @@ class RegonClient
             throw new InvalidArgumentException("$reportType is not valid report type.");
         }
     }
-    private function validateReportType($reportType)
+    /**
+     * @param string $reportType
+     * @return void
+     */
+    private function validateReportType(string $reportType): void
     {
         $isValid = in_array($reportType, self::VALID_REPORTS);
 
