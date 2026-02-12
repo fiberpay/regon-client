@@ -12,9 +12,6 @@ use Fiberpay\RegonClient\RegonErrorCode;
  * - PKD codes not available for entities deleted before 2014-11-08 (code 11)
  * - Entity is not a civil partnership, so partnership report is not applicable (code 21)
  * - No partners registered for this civil partnership (code 22)
- *
- * Extends EntityNotFoundException for backward compatibility — existing catch blocks
- * that catch EntityNotFoundException will still work.
  */
 class RegonDataNotAvailableException extends Exception implements RegonApiErrorResponseException
 {
