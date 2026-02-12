@@ -2,6 +2,7 @@
 
 namespace Fiberpay\RegonClient\Exceptions;
 
+use Exception;
 use Fiberpay\RegonClient\RegonErrorCode;
 
 /**
@@ -15,7 +16,7 @@ use Fiberpay\RegonClient\RegonErrorCode;
  * Extends EntityNotFoundException for backward compatibility — existing catch blocks
  * that catch EntityNotFoundException will still work.
  */
-class RegonDataNotAvailableException extends EntityNotFoundException
+class RegonDataNotAvailableException extends Exception implements RegonApiErrorResponseException
 {
     private RegonErrorCode $errorCode;
 
