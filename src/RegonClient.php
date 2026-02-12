@@ -6,8 +6,10 @@ namespace Fiberpay\RegonClient;
 
 use Fiberpay\RegonClient\Exceptions\EntityNotFoundException;
 use Fiberpay\RegonClient\Exceptions\InvalidEntityIdentifierException;
+use Fiberpay\RegonClient\Exceptions\RegonDataNotAvailableException;
 use Fiberpay\RegonClient\Exceptions\RegonServiceCallFailedException;
 use InvalidArgumentException;
+use SimpleXMLElement;
 use SoapFault;
 use SoapHeader;
 
@@ -167,11 +169,7 @@ class RegonClient
             $data = simplexml_load_string($result->DaneSzukajPodmiotyResult)->dane;
 
             if (property_exists($data, 'ErrorCode')) {
-                $error = $language === "pl" ?  $data->ErrorMessagePl : $data->ErrorMessageEn;
-                if ($data->ErrorCode == '4') {
-                    throw new EntityNotFoundException($error);
-                }
-                throw new RegonServiceCallFailedException($error);
+                $this->handleRegonError($data, $language);
             }
             return $this->toArray($data);
 
@@ -199,11 +197,7 @@ class RegonClient
             $xmlString = $result->DanePobierzRaportZbiorczyResult;
             $dataXml = simplexml_load_string($xmlString);
             if (property_exists($dataXml->dane, 'ErrorCode')) {
-                $error = $language === "pl" ?  $dataXml->dane->ErrorMessagePl : $dataXml->dane->ErrorMessageEn;
-                if ($dataXml->dane->ErrorCode == "4") {
-                    throw new EntityNotFoundException($error);
-                }
-                throw new RegonServiceCallFailedException($error);
+                $this->handleRegonError($dataXml->dane, $language);
             }
             $data = json_decode(json_encode($dataXml), true);
             return $data["dane"];
@@ -231,11 +225,10 @@ class RegonClient
             $data = simplexml_load_string($result->DanePobierzPelnyRaportResult);
 
             if (property_exists($data->dane, 'ErrorCode')) {
-                $error = $language === "pl" ?  $data->dane->ErrorMessagePl : $data->dane->ErrorMessageEn;
-                throw new RegonServiceCallFailedException($error);
+                $this->handleRegonError($data->dane, $language);
             }
 
-            //Kody PKD i wspólnicy przychodzą raz jako obiekt, raz jako tablica obiektów, trzeba dostosować argument w toArray
+            // PKD codes and partners may come as a single object or an array of objects — adjust the toArray argument accordingly
             if (!in_array($reportType, [self::REPORT_TYPE_NATURAL_PERSON_PKD, self::REPORT_TYPE_LEGAL_PERSON_PKD,
                 self::REPORT_TYPE_LEGAL_PERSON_CIVIL_PARTNERSHIP_PARTNERS, self::REPORT_TYPE_LEGAL_PERSON_LOCAL_UNITS_LIST
             ])) {
@@ -339,6 +332,52 @@ class RegonClient
         $client->__setSoapHeaders($headers);
 
         return $client;
+    }
+
+    /**
+     * Handles error responses from the REGON API by throwing appropriate exceptions.
+     *
+     * @param SimpleXMLElement $data The <dane> element containing ErrorCode
+     * @param string $language Language code ('pl' or 'en')
+     * @return never
+     * @throws EntityNotFoundException When entity is not found (code 4)
+     * @throws RegonDataNotAvailableException When entity exists but data is not available (codes 11, 21, 22)
+     * @throws RegonServiceCallFailedException For all other errors (e.g., invalid report name, code 5)
+     */
+    private function handleRegonError(SimpleXMLElement $data, string $language): never
+    {
+        $errorCode = RegonErrorCode::tryFrom((string) $data->ErrorCode);
+        $errorMessage = $this->getRegonErrorMessage($data, $language);
+
+        if ($errorCode?->isEntityNotFound()) {
+            throw new EntityNotFoundException($errorMessage);
+        }
+
+        if ($errorCode?->isDataNotAvailable()) {
+            throw new RegonDataNotAvailableException($errorMessage, $errorCode);
+        }
+
+        throw new RegonServiceCallFailedException($errorMessage);
+    }
+
+    /**
+     * Extracts the error message from a REGON API error response.
+     *
+     * The API uses two different formats:
+     * - ErrorMessagePl/ErrorMessageEn (for codes 4, 5, 11)
+     * - DatabaseSearchResultPl/DatabaseSearchResultEn (for codes 21, 22)
+     */
+    private function getRegonErrorMessage(SimpleXMLElement $data, string $language): string
+    {
+        if (property_exists($data, 'ErrorMessagePl')) {
+            return (string) ($language === 'pl' ? $data->ErrorMessagePl : $data->ErrorMessageEn);
+        }
+
+        if (property_exists($data, 'DatabaseSearchResultPl')) {
+            return (string) ($language === 'pl' ? $data->DatabaseSearchResultPl : $data->DatabaseSearchResultEn);
+        }
+
+        return "Unknown REGON API error (code: {$data->ErrorCode})";
     }
 
     /**

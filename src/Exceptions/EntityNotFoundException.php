@@ -3,16 +3,17 @@
 namespace Fiberpay\RegonClient\Exceptions;
 
 use Exception;
-use SimpleXMLElement;
+use Fiberpay\RegonClient\RegonErrorCode;
 
-class EntityNotFoundException extends Exception
+class EntityNotFoundException extends Exception implements RegonApiErrorResponseException
 {
-
-    /**
-     * @param false|SimpleXMLElement $message
-     */
-    public function __construct($message)
+    public function __construct(string $message)
     {
         parent::__construct($message);
+    }
+
+    public function getErrorCode(): RegonErrorCode
+    {
+        return RegonErrorCode::ENTITY_NOT_FOUND;
     }
 }

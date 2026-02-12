@@ -11,10 +11,14 @@
     {
       "name": "Jędrzej Jarocki",
       "email": "jedrzej.jarocki@inpay.pl"
+    },
+    {
+      "name": "Maciej Rybak",
+      "email": "maciej.rybak@inpay.pl"
     }
   ],
   "require": {
-    "php": "^7.4|^8.0",
+    "php": "^8.1",
     "ext-soap": "*",
     "ext-simplexml": "*",
     "ext-json": "*"
