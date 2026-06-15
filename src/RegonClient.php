@@ -36,6 +36,7 @@ class RegonClient
     public const REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY = 'BIR11OsFizycznaDzialalnoscSkreslona';
     public const REPORT_TYPE_LEGAL_PERSON_CIVIL_PARTNERSHIP_PARTNERS = 'BIR12OsPrawnaSpCywilnaWspolnicy';
     public const REPORT_TYPE_LEGAL_PERSON_LOCAL_UNITS_LIST = 'BIR12OsPrawnaListaJednLokalnych';
+    public const REPORT_TYPE_LEGAL_PERSON_LOCAL_UNIT = 'Bir121JednLokalnaOsPrawnej';
 
     private const VALID_REPORTS = [
         self::REPORT_TYPE_ENTITY_TYPE,
@@ -48,7 +49,8 @@ class RegonClient
         self::REPORT_TYPE_NATURAL_PERSON_OTHER_ACTIVITY,
         self::REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY,
         self::REPORT_TYPE_LEGAL_PERSON_CIVIL_PARTNERSHIP_PARTNERS,
-        self::REPORT_TYPE_LEGAL_PERSON_LOCAL_UNITS_LIST
+        self::REPORT_TYPE_LEGAL_PERSON_LOCAL_UNITS_LIST,
+        self::REPORT_TYPE_LEGAL_PERSON_LOCAL_UNIT
     ];
 
     public const CUMULATIVE_REPORT_TYPE_NEW_PARTIES = 'BIR11NowePodmiotyPrawneOrazDzialalnosciOsFizycznych';
