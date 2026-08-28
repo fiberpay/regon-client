@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <dane>
+        <Regon>123456789</Regon>
+        <Nip>9876543210</Nip>
+        <Nazwa>Example natural person</Nazwa>
+        <Typ>F</Typ>
+        <SilosID>1</SilosID>
+    </dane>
+</root>
