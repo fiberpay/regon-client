@@ -19,6 +19,7 @@ class RegonClient
     private string $wsdlUrl;
     private string $serviceUrl;
     private string $clientKey;
+    private RegonSearchResponseParser $searchResponseParser;
 
     private const LOGIN_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/Zaloguj';
     private const FIND_ACTION = 'http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DaneSzukajPodmioty';
@@ -97,6 +98,7 @@ class RegonClient
         $this->wsdlUrl = self::WSDL_URL[$environment];
         $this->serviceUrl = self::SERVICE_URL[$environment];
         $this->clientKey = $validClientKey;
+        $this->searchResponseParser = new RegonSearchResponseParser();
     }
 
     /**
@@ -168,12 +170,15 @@ class RegonClient
         try {
             $client = $this->createSoapClient(self::FIND_ACTION, $session);
             $result = $client->DaneSzukajPodmioty(['pParametryWyszukiwania' => [$id => $value]]);
-            $data = simplexml_load_string($result->DaneSzukajPodmiotyResult)->dane;
+            $response = $this->searchResponseParser->parseXml((string) $result->DaneSzukajPodmiotyResult);
 
-            if (property_exists($data, 'ErrorCode')) {
-                $this->handleRegonError($data, $language);
+            foreach ($response->dane as $record) {
+                if (property_exists($record, 'ErrorCode')) {
+                    $this->handleRegonError($record, $language);
+                }
             }
-            return $this->toArray($data);
+
+            return $this->searchResponseParser->parseDocument($response);
 
         } catch (SoapFault $e) {
             $this->handleSoapFault($e);

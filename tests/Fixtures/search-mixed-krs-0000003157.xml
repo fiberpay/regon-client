@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <dane>
+        <Regon>27685494600001</Regon>
+        <Nazwa>Local unit 1</Nazwa>
+        <Typ>LP</Typ>
+        <SilosID>6</SilosID>
+    </dane>
+    <dane>
+        <Regon>27685494600002</Regon>
+        <Nazwa>Local unit 2</Nazwa>
+        <Typ>LP</Typ>
+        <SilosID>6</SilosID>
+    </dane>
+    <dane>
+        <Regon>27685494600003</Regon>
+        <Nazwa>Local unit 3</Nazwa>
+        <Typ>LP</Typ>
+        <SilosID>6</SilosID>
+    </dane>
+    <dane>
+        <Regon>27685494600004</Regon>
+        <Nazwa>Local unit 4</Nazwa>
+        <Typ>LP</Typ>
+        <SilosID>6</SilosID>
+    </dane>
+    <dane>
+        <Regon>276854946</Regon>
+        <Nazwa>Example main legal person</Nazwa>
+        <Typ>P</Typ>
+        <SilosID>6</SilosID>
+    </dane>
+    <dane>
+        <Regon>27685494600005</Regon>
+        <Nazwa>Local unit 5</Nazwa>
+        <Typ>LP</Typ>
+        <SilosID>6</SilosID>
+    </dane>
+    <dane>
+        <Regon>27685494600006</Regon>
+        <Nazwa>Local unit 6</Nazwa>
+        <Typ>LP</Typ>
+        <SilosID>6</SilosID>
+    </dane>
+</root>
