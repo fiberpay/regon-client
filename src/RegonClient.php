@@ -34,7 +34,7 @@ class RegonClient
     public const REPORT_TYPE_NATURAL_PERSON_PKD = 'BIR11OsFizycznaPkd';
     public const REPORT_TYPE_NATURAL_PERSON_AGRICULTURAL_ACTIVITY = 'BIR11OsFizycznaDzialalnoscRolnicza';
     public const REPORT_TYPE_NATURAL_PERSON_OTHER_ACTIVITY = 'BIR11OsFizycznaDzialalnoscPozostala';
-    public const REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY = 'BIR11OsFizycznaDzialalnoscSkreslona';
+    public const REPORT_TYPE_NATURAL_PERSON_DELETED_ACTIVITY = 'BIR11OsFizycznaDzialalnoscSkreslonaDo20141108';
     public const REPORT_TYPE_LEGAL_PERSON_CIVIL_PARTNERSHIP_PARTNERS = 'BIR12OsPrawnaSpCywilnaWspolnicy';
     public const REPORT_TYPE_LEGAL_PERSON_LOCAL_UNITS_LIST = 'BIR12OsPrawnaListaJednLokalnych';
     public const REPORT_TYPE_LEGAL_PERSON_LOCAL_UNIT = 'Bir121JednLokalnaOsPrawnej';
