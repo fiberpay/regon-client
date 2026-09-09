@@ -13,7 +13,7 @@ use SimpleXMLElement;
 use SoapFault;
 use SoapHeader;
 
-class RegonClient
+class RegonClient implements RegonClientInterface
 {
 
     private string $wsdlUrl;
