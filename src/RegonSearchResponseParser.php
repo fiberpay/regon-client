@@ -31,7 +31,12 @@ final class RegonSearchResponseParser
         $records = [];
 
         foreach ($response->dane as $record) {
-            $records[] = get_object_vars($record);
+            $records[] = json_decode(
+                json_encode(get_object_vars($record), JSON_THROW_ON_ERROR),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
         }
 
         return match (count($records)) {

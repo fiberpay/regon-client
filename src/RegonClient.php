@@ -434,6 +434,11 @@ class RegonClient
      */
     private function toArray($data): array
     {
-        return get_object_vars($data);
+        return json_decode(
+            json_encode(get_object_vars($data), JSON_THROW_ON_ERROR),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
     }
 }

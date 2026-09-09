@@ -53,6 +53,35 @@ final class RegonSearchResponseParserTest extends TestCase
         self::assertSame('276854946', $result[4]['Regon']);
     }
 
+    public function testItNormalizesEmptyAndNestedFieldsInASingleRecord(): void
+    {
+        $result = $this->parser()->parse(
+            '<root><dane><Regon>001234567</Regon><Nazwa>Żółta Spółka</Nazwa><Typ>P</Typ>'
+                . '<Nip/><Adres><KodPocztowy>00-001</KodPocztowy><NrLokalu/></Adres></dane></root>'
+        );
+
+        self::assertSame([
+            'Regon' => '001234567',
+            'Nazwa' => 'Żółta Spółka',
+            'Typ' => 'P',
+            'Nip' => [],
+            'Adres' => ['KodPocztowy' => '00-001', 'NrLokalu' => []],
+        ], $result);
+    }
+
+    public function testItNormalizesEveryRecordWithoutCollapsingTheList(): void
+    {
+        $result = $this->parser()->parse(
+            '<root><dane><Regon>001234567</Regon><Typ>F</Typ><SilosID>1</SilosID><Nip/></dane>'
+                . '<dane><Regon>001234567</Regon><Typ>F</Typ><SilosID>2</SilosID><Nip/></dane></root>'
+        );
+
+        self::assertSame([
+            ['Regon' => '001234567', 'Typ' => 'F', 'SilosID' => '1', 'Nip' => []],
+            ['Regon' => '001234567', 'Typ' => 'F', 'SilosID' => '2', 'Nip' => []],
+        ], $result);
+    }
+
     public function testItTurnsMalformedXmlIntoAControlledServiceFailure(): void
     {
         $this->expectException(RegonServiceCallFailedException::class);
